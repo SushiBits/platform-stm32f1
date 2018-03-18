@@ -13,12 +13,19 @@ extern int errno;
 #include <unistd.h>
 
 static void *mem_end = NULL;
-extern uint8_t __bss_end__, __heap_end;
+extern uint8_t __bss_end__;
 
-static inline void *getsp(void)
+__attribute__((always_inline)) static inline void *getsp(void)
 {
 	uint32_t ptr;
 	asm volatile ("mov %0, sp" : "=r" (ptr) );
+	return (void *)ptr;
+}
+
+__attribute__((always_inline)) static inline void *getheap(void)
+{
+	uint32_t ptr;
+	asm volatile ("ldr %0, =__heap_end" : "=r" (ptr) );
 	return (void *)ptr;
 }
 
@@ -30,7 +37,7 @@ void *_sbrk(ptrdiff_t incr)
 	void *oldbrk = mem_end;
 	void *newbrk = oldbrk + incr;
 
-	if ((void *)newbrk >= (void *)(&__heap_end ?: getsp()))
+	if ((void *)newbrk >= (void *)(getheap() ?: getsp()))
 	{
 		errno = ENOMEM;
 		return NULL;
