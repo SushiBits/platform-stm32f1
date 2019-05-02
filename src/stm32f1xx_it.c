@@ -45,8 +45,6 @@ __attribute__((noreturn)) void Reset_IRQHandler(void)
 {
 	SystemInit();
 
-	SCB->VTOR = (uint32_t)ISR_Vector;
-
 	uint32_t count = __copy_size / sizeof(struct copyitem);
 	for (uint32_t idx = 0; idx < count; idx++)
 	{
@@ -62,6 +60,8 @@ __attribute__((noreturn)) void Reset_IRQHandler(void)
 	}
 
 	SystemCoreClockUpdate();
+
+	SCB->VTOR = (uint32_t)ISR_Vector;
 
 	_start();
 }
